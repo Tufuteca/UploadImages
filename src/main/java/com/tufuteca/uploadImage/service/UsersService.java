@@ -15,4 +15,9 @@ public class UsersService {
     public void addUser(Users newUser) {
         usersRepository.save(newUser);
     }
+
+
+    public Users findByLogin(String name) {
+        return usersRepository.findUsersByLogin(name);
+    }
 }
