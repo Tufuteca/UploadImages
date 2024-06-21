@@ -1,0 +1,24 @@
+<!-- src/main/resources/templates/blocks/header.html -->
+<div th:fragment="header">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a href="/" class="nav-link fw-bold" style="color:white;" aria-current="page">Главная</a></li>
+        <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+            <li class="nav-item">
+                <a class="nav-link fw-bold" style="color:white;" href="/my-images">Мои изображения</a>
+            </li>
+        </div>
+        <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+            <li class="nav-item">
+                <a class="nav-link fw-bold" style="color:white;" href="/upload-images">Загрузить изображение</a>
+            </li>
+        </div>
+        </li>
+        <div th:if="${#authorization.expression('isAnonymous()')}">
+            <li class="nav-item"><a href="/authorization" class="nav-link fw-bold" style="color:white;">Профиль</a></li>
+        </div>
+
+        <div th:if="${#authorization.expression('hasRole(''ROLE_USER'')')} or ${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+        <li class="nav-item"><a href="/perform_logout" class="nav-link fw-bold" style="color:white;">Выйти из аккаунта</a></li>
+        </div>
+    </ul>
+</div>
