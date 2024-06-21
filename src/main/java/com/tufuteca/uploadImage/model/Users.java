@@ -22,7 +22,7 @@ public class Users {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "users")
+    @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
-
 }
