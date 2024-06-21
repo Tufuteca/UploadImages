@@ -4,6 +4,7 @@ import com.tufuteca.uploadImage.model.ImageModel;
 import com.tufuteca.uploadImage.model.Images;
 import com.tufuteca.uploadImage.model.Users;
 import com.tufuteca.uploadImage.service.ImagesService;
+import com.tufuteca.uploadImage.service.TimeAgoService;
 import com.tufuteca.uploadImage.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,15 +30,21 @@ public class MyImagesController {
     @Autowired
     private ImagesService imagesService;
 
+    @Autowired
+    private TimeAgoService timeAgoService;
+
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public String myImagesPage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = usersService.findByLogin(authentication.getName());
         List<Images> userPhotos = imagesService.findByUser(user);
 
         List<ImageModel> imageModels = userPhotos.stream()
-                .map(image -> new ImageModel(Base64.getEncoder().encodeToString(image.getImageData()), image.getId()))
+                .map(image -> new ImageModel(Base64.getEncoder().encodeToString(image.getImageData()),
+                        image.getId(),
+                        image.getUsers().getLogin(),
+                        timeAgoService.getTimeAgo(image.getDateImageAdded())))
                 .collect(Collectors.toList());
 
         model.addAttribute("userPhotos", imageModels);
@@ -47,7 +54,7 @@ public class MyImagesController {
 
 
     @PostMapping("/upload")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public String uploadImage(@RequestParam("imageFile") MultipartFile imageFile) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = usersService.findByLogin(authentication.getName());
@@ -66,11 +73,17 @@ public class MyImagesController {
     }
 
     @PostMapping("/delete/{id}")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public String deleteImage(@PathVariable Long id) {
-        System.out.println(id);
-        imagesService.deleteById(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Users user = usersService.findByLogin(authentication.getName());
+        Images images = imagesService.findImageById(id);
+        if(images.getUsers().equals(user)){
+            imagesService.delete(images);
+        }
         return "redirect:/my-images";
     }
+
+
 
 }
