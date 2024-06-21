@@ -4,9 +4,11 @@ import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "images")
@@ -23,6 +25,11 @@ public class Images {
     private LocalDateTime dateImageAdded;
 
     @Lob
+    @Type(type="org.hibernate.type.BinaryType")
     @Column(name = "image_data", columnDefinition = "bytea")
     private byte[] imageData;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users users;
 }
